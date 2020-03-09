@@ -8,19 +8,20 @@ GDCODEC gd_Display;
 SSTREAMLIST sl_System;
 
 unsigned char __WAY gdmain() {
-	win::i_Width = 300;
-	win::i_Height = 200;
+	win::i_Width = S_STYLE_WIDTH;
+	win::i_Height = S_STYLE_HEIGHT;
 	gd_Console.Create();
 
+	sl_System.init(&gd_Display, S_BITSTREAM_STREAMS,S_BITSTREAM_LENGTH);
+
 	gd_Display.Prepare(win::i_Width, win::i_Height);
-	sl_System.init(S_BITSTREAM_LENGTH, S_BITSTREAM_STREAMS);
 
 	return TRUE;
 }
 unsigned char __WAY gdupdate() {
 
 	gd_Display.CleanBuffer();
-	sl_System.render(&gd_Display);
+	sl_System.render();
 	SetScreenBuffer(gd_Display.d_pOutputStream, win::i_Width, win::i_Height);
 
 	return TRUE;

@@ -15,12 +15,12 @@ c_bitstream::deinit()
 }
 
 void __stdcall 
-c_streamlist::init(int i_bits, int i_streams)
+c_streamlist::init(GDCODEC * gd_pCodec,char i_streams,char i_bits)
 {
-	this->s_pStreams = (SBITSTREAM*)malloc(sizeof(SBITSTREAM)*i_streams);
+	this->s_pStreams = (SBITSTREAM*)malloc(sizeof(SBITSTREAM)* i_streams);
 	for (int i_index = 0; i_index < i_streams; i_index++)
 	{
-		if (this->s_pStreams[i_index].init(i_bits) == FALSE) 
+		if (this->s_pStreams[i_index].init(i_bits) == FALSE)
 		{
 			for (int i_subindex = 0; i_subindex <= i_index; i_subindex++)
 			{
@@ -32,12 +32,13 @@ c_streamlist::init(int i_bits, int i_streams)
 		{
 			for (int i_subindex = 0; i_subindex < i_bits; i_subindex++)
 			{
-				this->s_pStreams->c_pBits[i_subindex] = i_bits%2;
+				this->s_pStreams[i_index].c_pBits[i_subindex] = i_subindex %2;
 			}
 		}
 	}
-	this->i_streams = i_streams;
+	this->gd_pCodec = gd_pCodec;
 	this->i_bits = i_bits;
+	this->i_streams = i_streams;
 }	
 
 void __stdcall 
@@ -51,27 +52,30 @@ c_streamlist::deinit()
 }
 
 void __stdcall 
-c_streamlist::render(GDCODEC* o_pRender) 
+c_streamlist::render() 
 {
 
 	int i_offset;
-	GDPOINT p_One, p_Two,p_Last;
-	GDCOLOR c_Color(255,255,0);
-	for (int i_streamindex = 0; i_streamindex < this->i_streams; i_streamindex++)
+	GDPOINT p_One, p_Two;
+	for (int i_streamindex = 0; i_streamindex < S_STYLE_VER_BOXES; i_streamindex++)
 	{
-		for (int i_bitindex = 0; i_bitindex < this->i_bits; i_bitindex++)
+		if (i_streamindex == this->i_streams)break;
+		for (int i_bitindex = 0; i_bitindex < S_STYLE_HOR_BOXES; i_bitindex++)
 		{
-			i_offset = i_streamindex * S_STYLE_BOXING*2;
+			if (i_bitindex == this->i_bits)break;
+
+			i_offset = i_streamindex * S_STYLE_BOXING*2+ S_STYLE_BOXING;
 			p_One.f_Pos[0] = i_bitindex * S_STYLE_BOXING;
 			p_Two.f_Pos[0] = (i_bitindex+1) * S_STYLE_BOXING;
-				
-			p_One.f_Pos[1] = i_offset + S_STYLE_BOXING ;
-			p_Two.f_Pos[1] = i_offset + S_STYLE_BOXING ;
-			//p_One.f_Pos[1] = i_offset + S_STYLE_BOXING * this->s_pStreams[i_streamindex].c_pBits[i_bitindex];
-			//p_Two.f_Pos[1] = i_offset + S_STYLE_BOXING * this->s_pStreams[i_streamindex].c_pBits[i_bitindex];
-			o_pRender->DrawLine(&p_One, &p_Two, & c_Color);
-			printf("%d ", i_bitindex);
+			
+			p_One.f_Pos[1] = i_offset +(S_STYLE_BOXING * s_pStreams[i_streamindex].c_pBits[i_bitindex]);
+			p_Two.f_Pos[1] = i_offset;
+			//p_Two.f_Pos[1] = i_offset +(S_STYLE_BOXING * s_pStreams[i_streamindex].c_pBits[i_bitindex]);
+			
+
+			this->gd_pCodec->DrawHLine(&p_One, S_STYLE_BOXING, &c_finish);
+			if(s_pStreams[i_streamindex].c_pBits[i_bitindex+1] == 1)
+			this->gd_pCodec->DrawVLine(&p_Two, S_STYLE_BOXING, &c_finish);
 		}
-		printf(" -> %d\n", i_streamindex);
 	}
 }
