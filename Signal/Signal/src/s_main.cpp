@@ -1,11 +1,14 @@
 #include"s_header.h"
 
 #include <chrono>
-
+#include <thread>
 GDCONSOLE gd_Console;
 GDCODEC gd_Display;
 
 SSTREAMLIST sl_System;
+
+void __WAY inputroutine();
+std::thread t_Inputroutine(inputroutine);
 
 unsigned char __WAY gdmain() {
 	win::i_Width = S_STYLE_WIDTH;
@@ -21,6 +24,7 @@ unsigned char __WAY gdmain() {
 unsigned char __WAY gdupdate() {
 
 	gd_Display.CleanBuffer();
+	sl_System.render_background();
 	sl_System.render();
 	SetScreenBuffer(gd_Display.d_pOutputStream, win::i_Width, win::i_Height);
 
@@ -29,4 +33,11 @@ unsigned char __WAY gdupdate() {
 }
 void __WAY gdclose() {
 	gd_Display.Dispose();
+}
+void __WAY inputroutine() 
+{
+	while (1)
+	{
+		sl_System.inputhandler();
+	}
 }
